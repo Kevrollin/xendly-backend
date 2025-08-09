@@ -13,15 +13,14 @@ use crate::database::sqlite::GLOBAL_DB;
 use uuid::Uuid;
 use axum::{http::HeaderValue};
 use tower_http::cors::{CorsLayer, Any};
-use hyper::Method;
+//use hyper::Method;
 //use axum::{routing::options, http::StatusCode};
 use axum::{
     http::Method,
     routing::{get, post, options},
-    Router,
 };
 use http::StatusCode;
-use axum::routing::post;
+
 
 mod routes;
 mod types;
