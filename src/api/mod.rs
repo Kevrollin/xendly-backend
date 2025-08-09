@@ -13,6 +13,7 @@ use crate::database::sqlite::GLOBAL_DB;
 use uuid::Uuid;
 use axum::{http::HeaderValue};
 use tower_http::cors::{CorsLayer, Any};
+use crate::api::routes;
 //use hyper::Method;
 //use axum::{routing::options, http::StatusCode};
 use axum::{
@@ -182,19 +183,16 @@ pub async fn start_http_server() {
         .allow_headers(Any);
 
     let app = Router::new()
-        .layer(cors) // CORS FIRST!
-        .layer(axum::middleware::from_fn(request_id_middleware))
+        // Auth routes with CORS preflight handling
+        .route("/api/auth/login", post(routes::login))
+        .route("/api/auth/login", options(|| async { StatusCode::NO_CONTENT }))
 
-        .route("/api/auth/login", axum::routing::options(|| async { () }))
-        .route("/api/auth/register", axum::routing::options(|| async { () }))
+        .route("/api/auth/register", post(routes::register))
+        .route("/api/auth/register", options(|| async { StatusCode::NO_CONTENT }))
 
-        //.route("/api/auth/login", options(|| async { StatusCode::NO_CONTENT }))
-        // POST for login
-        //.route("/api/auth/login", post(routes::login))
-        //.route("/api/auth/register", options(|| async { StatusCode::NO_CONTENT }))
-        // POST for register
-        //.route("/api/auth/register", post(routes::register))
-        .route("/api/*path", options(|| async { StatusCode::NO_CONTENT })) // fallback for other paths
+        // Catch-all OPTIONS for any other /api routes
+        .route("/api/*path", options(|| async { StatusCode::NO_CONTENT }))
+
         .nest("/api/auth", routes::auth_router())
         .nest("/api/wallets", routes::wallet_router())
         .nest("/api/profile", routes::profile_router())
@@ -215,8 +213,8 @@ pub async fn start_http_server() {
         // Redoc UI
         .merge(Redoc::with_url("/api/redoc", openapi))
         .layer(Extension(shared_state))
-        //.layer(cors)
-        //.layer(axum::middleware::from_fn(request_id_middleware));
+        .layer(cors)
+        .layer(axum::middleware::from_fn(request_id_middleware));
 
     // ✅ Render binding to 0.0.0.0 and using PORT from env
     let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
