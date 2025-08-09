@@ -183,10 +183,10 @@ pub async fn start_http_server() {
 
     let app = Router::new()
         // Auth routes with CORS preflight handling
-        .route("/api/auth/login", post(routes::login))
+        //.route("/api/auth/login", post(routes::login))
         .route("/api/auth/login", options(|| async { StatusCode::NO_CONTENT }))
 
-        .route("/api/auth/register", post(routes::register))
+        //.route("/api/auth/register", post(routes::register))
         .route("/api/auth/register", options(|| async { StatusCode::NO_CONTENT }))
 
         // Catch-all OPTIONS for any other /api routes

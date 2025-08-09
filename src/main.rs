@@ -32,18 +32,21 @@ fn init_tracing() {
 async fn main() {
     init_tracing();
     dotenv::dotenv().ok();
-    // Start both CLI and HTTP server (for now)
-    let http = tokio::spawn(async move {
-        api::start_http_server().await;
-    });
-    let cli = tokio::spawn(async move {
+
+    let args: Vec<String> = std::env::args().collect();
+
+    if args.len() > 1 && args[1] == "cli" {
+        // Run CLI only (for local dev)
         if let Err(e) = run().await {
             eprintln!("{}", format!("Application error: {}", e).red());
             std::process::exit(1);
         }
-    });
-    let _ = tokio::try_join!(http, cli);
+    } else {
+        // Run HTTP server only (default for Render)
+        api::start_http_server().await;
+    }
 }
+
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
