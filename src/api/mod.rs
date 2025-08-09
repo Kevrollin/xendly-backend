@@ -19,7 +19,7 @@ use axum::{
     http::Method,
     routing::{get, post, options},
 };
-use http::StatusCode;
+use axum::http::StatusCode;
 
 
 mod routes;
